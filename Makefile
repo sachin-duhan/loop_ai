@@ -53,7 +53,7 @@ test: dev-install pytest code-analysis
 
 .PHONY: dev-install
 dev-install: ## Install testing in development mode.
-	$(PIP) install -r requirements-common.txt
+	$(PIP) install -r requirements.txt
 
 .PHONY: pytest
 pytest: ## Tests the code base and creates code coverage report.
