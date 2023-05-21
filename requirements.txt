@@ -1,0 +1,11 @@
+pytest
+redis
+loguru
+pandas
+pytz
+sqlalchemy
+psycopg2-binary
+gdown
+flask
+flask_cors
+python-dotenv
