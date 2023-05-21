@@ -9,3 +9,4 @@ gdown
 flask
 flask_cors
 python-dotenv
+black
