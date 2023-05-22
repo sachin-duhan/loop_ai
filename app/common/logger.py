@@ -3,6 +3,7 @@ import sys
 
 try:
     from loguru import logger
+
     class InterceptHandler(logging.Handler):
         def emit(self, record):
             try:

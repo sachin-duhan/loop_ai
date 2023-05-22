@@ -23,47 +23,55 @@ load_dotenv()
 app = Flask(__name__)
 
 CORS(app)
-PORT = os.getenv('port', 5000)
+PORT = os.getenv("port", 5000)
 
-@app.route("/trigger_report", methods=['GET'])
+
+@app.route("/trigger_report", methods=["GET"])
 def trigger_report():
     report_id = str(uuid4())
     trigger_report_thread = threading.Thread(target=Report().process, args=[report_id])
     trigger_report_thread.start()
 
-    return jsonify({'report_id': report_id, 'status': f'localhost:{PORT}/get_report'}), 200
+    return (
+        jsonify({"report_id": report_id, "status": f"localhost:{PORT}/get_report"}),
+        200,
+    )
 
 
-@app.route("/get_report", methods=['POST'])
+@app.route("/get_report", methods=["POST"])
 def get_report():
     body = request.get_json()
-    report_id = body['report_id']
+    report_id = body["report_id"]
 
     with Redis() as redis_client:
         response = {
             "status": redis_client.hget(REDIS_JOBS_TABLE, report_id).decode(),
-            "report": None
+            "report": None,
         }
-        if response['status'] == JobStatus.RUNNING.value:
+        if response["status"] == JobStatus.RUNNING.value:
             return jsonify(response)
         elif not os.path.exists(os.path.join(LOG_PATH, report_id + ".csv")):
-            response['status'] = "Report does not exist"
+            response["status"] = "Report does not exist"
             return jsonify(response)
         else:
-            response['status'] = JobStatus.COMPLETED.value
-            with open(f'{str(report_id)}.csv', 'rb') as report_file:
-                response['report'] = base64.b64encode(report_file.read()).decode('utf-8')
+            response["status"] = JobStatus.COMPLETED.value
+            with open(f"{str(report_id)}.csv", "rb") as report_file:
+                response["report"] = base64.b64encode(report_file.read()).decode(
+                    "utf-8"
+                )
 
-        status_code = 200 if response['status'] != JobStatus.FAILED.value else 500
+        status_code = 200 if response["status"] != JobStatus.FAILED.value else 500
         return jsonify(response), status_code
 
 
 @app.errorhandler(Exception)
 def internal_server_error(e):
-    return jsonify({'msg': 'Internal server error'}), 500
+    return jsonify({"msg": "Internal server error"}), 500
+
 
 @app.errorhandler(500)
 def internal_server_error_500(e):
-    return jsonify({'msg': 'Internal server error'}), 500
+    return jsonify({"msg": "Internal server error"}), 500
 
-app.run(debug=os.getenv('env', 'dev') == 'dev')
+
+app.run(debug=os.getenv("env", "dev") == "dev")

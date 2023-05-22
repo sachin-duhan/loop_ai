@@ -10,3 +10,5 @@ flask
 flask_cors
 python-dotenv
 black
+flake8
+isort
