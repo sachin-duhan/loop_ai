@@ -7,8 +7,8 @@ import pandas as pd
 
 from app.common.redis import Redis
 from app.constants import REDIS_JOBS_TABLE, DEFAULT_TIMEZONE
-from app.types import JobStatus
-from app.constants import LOG_PATH
+from app.jobs import JobStatus
+from app.constants import LOG_PATH, REPORT_OUTPUT_PATH
 
 LOGGER = logging.getLogger(__name__)
 
@@ -236,7 +236,7 @@ class Report:
             # Note start time
             start_time = time.perf_counter()
             LOGGER.info(f"Started processing for file with report_id : {report_id}")
-            self.cache.hset(REDIS_JOBS_TABLE, report_id, self.status.RUNNING.value)
+            self.cache.hset(REDIS_JOBS_TABLE, report_id, self.status.RUNNING)
 
             # better read this from db
             store_status = pd.read_csv(os.path.join(LOG_PATH, "store_data.csv"))
@@ -338,8 +338,7 @@ class Report:
                     [report, store_uptime_downtime.to_frame().T], ignore_index=True
                 )
 
-            # Save report using current_timestamp as ID
-            output_path = os.path.join(LOG_PATH, "output")
+            output_path = REPORT_OUTPUT_PATH
             os.makedirs(output_path, exist_ok=True)
             report.to_csv(
                 os.path.join(output_path, f"{str(report_id)}.csv"), index=False
@@ -349,10 +348,10 @@ class Report:
             LOGGER.info(f"Completed {report_id} in {time.perf_counter() - start_time}s")
 
             # Delete mapping from report ID to thread ID
-            self.cache.hset(REDIS_JOBS_TABLE, report_id, self.status.COMPLETED.value)
+            self.cache.hset(REDIS_JOBS_TABLE, report_id, self.status.COMPLETED)
 
         except Exception as e:
             LOGGER.error(
                 f"failed to completed job with report_id {report_id}", exc_info=True
             )
-            self.cache.hset(REDIS_JOBS_TABLE, report_id, self.status.FAILED.value)
+            self.cache.hset(REDIS_JOBS_TABLE, report_id, self.status.FAILED)

@@ -14,4 +14,6 @@ LOG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "data"
 )
 
+REPORT_OUTPUT_PATH = os.path.join(LOG_PATH, 'output')
+
 PRFETCH_DATA_TO_DB = False

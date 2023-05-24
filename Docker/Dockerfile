@@ -1,17 +1,18 @@
 # Base image
-FROM python:3.8
+FROM python:latest
 
 # Set working directory
 WORKDIR /app
 
 # Copy the requirements file
-COPY ../requirements.txt .
+COPY ../ .
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Install supervisor, Redis server, and PostgreSQL
-RUN apt-get update && apt-get install -y supervisor redis-server postgresql
+RUN pip install --no-cache-dir -r requirements.txt && \
+    # Install supervisor, Redis server, and PostgreSQL
+    apt-get update && apt-get install -y supervisor redis-server postgresql && \
+    # Making supervisord log path
+    mkdir -p /var/log/supervisor/
 
 # Copy the supervisor configuration file
 COPY ../supervisord.conf /etc/supervisor/conf.d/supervisord.conf

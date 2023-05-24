@@ -16,27 +16,25 @@ init_logger()
 
 LOGGER = logging.getLogger(__name__)
 
-with Postgres() as db_session:
-
-    def load_data_from_csv(file_key: str, table):
-        os.makedirs(LOG_PATH, exist_ok=True)
-        file_name = f"{file_key}.csv"
-        if not os.path.exists(os.path.join(LOG_PATH, file_name)):
-            gsheet_id = raw_data[file_key]
-            if not gsheet_id:
-                raise RuntimeError(
-                    "Could not download google sheet raw data. Update app.constants file"
-                )
-
-            gdown.download(
-                id=gsheet_id, output=os.path.join(LOG_PATH, file_name), quiet=False
+def load_data_from_csv(file_key: str, table):
+    os.makedirs(LOG_PATH, exist_ok=True)
+    file_name = f"{file_key}.csv"
+    if not os.path.exists(os.path.join(LOG_PATH, file_name)):
+        gsheet_id = raw_data[file_key]
+        if not gsheet_id:
+            raise RuntimeError(
+                "Could not download google sheet raw data. Update app.constants file"
             )
-            LOGGER.success(f"Downloaded {file_key}")
-            data_exits = False
 
-        if not PRFETCH_DATA_TO_DB:
-            return
+        gdown.download(
+            id=gsheet_id, output=os.path.join(LOG_PATH, file_name), quiet=False
+        )
+        LOGGER.success(f"Downloaded {file_key}")
 
+    if not PRFETCH_DATA_TO_DB:
+        return
+
+    with Postgres() as db_session:
         data_rows = []
         batch_size = 50000
 
@@ -62,7 +60,9 @@ with Postgres() as db_session:
 
             LOGGER.success(f"Completed upload for total {event_count} entries.")
             file.close()
+        db_session.close()
 
+if __name__ == "__main__":
     preload_tables = {
         "store_data": Store,
         "business_hours_data": BusinessHours,
@@ -76,4 +76,3 @@ with Postgres() as db_session:
             os.remove(file_path)
 
     LOGGER.success(f"Loaded required data files at {LOG_PATH}")
-    db_session.close()

@@ -1,7 +1,4 @@
-from enum import Enum
-
-
-class JobStatus(Enum):
+class JobStatus:
     RUNNING = "Running"
     COMPLETED = "Completed"
     FAILED = "Failed"
