@@ -1,4 +1,4 @@
-## Loop.xyz
+# Loop.xyz
 
 ```bash
 git clone https://github.com/sachin-duhan26/loop_ai
@@ -21,3 +21,15 @@ redis-server
 # run application.
 make run
 ```
+
+## Using Docker
+
+```bash
+docker build -t loop -f Docker/Dockerfile .
+docker run -p 5000:5000 loop
+```
+
+## Author
+- Sachin duhan
+- <strong>CV</strong> : https://drive.google.com/file/d/1d3BZjr1GyaBTdrjzL5TJMuF106Wd2k3t/view?usp=sharing
+- Linkdin : https://www.linkedin.com/in/sachin-duhan/
